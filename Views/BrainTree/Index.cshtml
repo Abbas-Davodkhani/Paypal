@@ -1,0 +1,57 @@
+@if (TempData["Success"] != null) 
+{ 
+    <div class="alert alert-success alert-dismissble">
+        <a href="#" class="close" data-dismissble="alert" aria-label="close">
+            &times;
+        </a>
+        @TempData["Success"]
+    </div>
+}
+<form action="" method="post" id="paymnet-form">
+    <div class="wrapper">
+        <div class="checkout container">
+            <header>
+                <h1 class="text-info">Test a random transaction between 1-100 using</h1>
+                <p class="text-success">
+                    Make a test payment with braintreee using Paypal or Card
+                </p>
+            </header>
+            <section>
+                <div class="bt-drop-in-wrapper">
+                    <div id="bt-dropin"></div>
+                </div>
+            </section>
+            <input type="hidden" id="nonce" name="payment_method_nonce" />
+            <button class="button" id="submit-button-"><span>Test transaction</span></button>
+        </div>
+    </div>
+</form>
+
+@section Scripts
+{
+<script src="https://js.braintreegateway.com/web/dropin/1.33.4/js/dropin.min.js"></script>
+<script>
+    var clientToken = "@ViewBag.ClientToken";
+    var form = document.querySelector("#paymnet-form");
+    braintree.dropin.create({
+        authorization: clientToken,
+        container: "#bt-dropin",
+        paypal: {
+            flow: 'vault'
+        }
+    }, function (createErr, instance) {
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+            instance.requestPaymentMethod(function (err, payload) {
+                if (err) {
+                    console.log("Error", err)
+                }
+                // add the nonce to the form and submit
+                document.querySelector("#nonce").value = payload.nonce;
+                form.submit();
+            
+            });
+        });
+    });
+</script>
+}
